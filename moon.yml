@@ -1,0 +1,7 @@
+tasks:
+  build:
+    command: "yarn dev"
+    inputs:
+      - "src/**/*"
+    outputs:
+      - "dist"
