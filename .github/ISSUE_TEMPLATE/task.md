@@ -1,11 +1,9 @@
-------------------------------------------------------
-name: ✅ Task
+---
+name: ✅ Task Ticket
 about: General work item or task to be completed
 title: "[TASK]"
 labels: task, needs-triage
 assignees: "eprislac"
----
-
 ---
 
 ## Task 📋
