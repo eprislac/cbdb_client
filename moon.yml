@@ -1,6 +1,6 @@
 tasks:
   build:
-    command: "yarn dev"
+    command: "npm run dev"
     inputs:
       - "src/**/*"
     outputs:

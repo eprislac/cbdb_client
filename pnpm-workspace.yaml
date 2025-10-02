@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - core-js-pure
+  - es5-ext
+  - sharp
+  - unrs-resolver
