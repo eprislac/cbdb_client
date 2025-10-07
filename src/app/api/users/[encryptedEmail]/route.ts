@@ -1,7 +1,7 @@
 import type { NextApiRequest } from "next";
-import { encrypt } from "@/lib/encryptionService";
+// import { encrypt } from "@/lib/encryptionService";
 import { logger } from "@/lib/logger";
-// const apiUrl = process.env.API_URL;
+const apiUrl = process.env.API_URL;
 
 export async function GET(
   _req: NextApiRequest,
@@ -22,7 +22,7 @@ export async function GET(
   log.debug(`name: ${name}`);
   log.debug(`encryptedEmail: ${encryptedEmail}`);
   const apiResponse = await fetch(
-    `http://api/api/v1/users/by_enc_str/${encryptedEmail}`,
+    `${apiUrl}/users/by_enc_str/${encryptedEmail}`,
   );
   const { data, message } = await apiResponse.json();
   let newData = data;
@@ -40,7 +40,7 @@ export async function GET(
         },
       }),
     };
-    const createResponse = await fetch(`http://api/api/v1/users`, params);
+    const createResponse = await fetch(`${apiUrl}/v1/users`, params);
     newData = await createResponse.json();
   } else {
     newData = {
