@@ -27,9 +27,9 @@ async function safeSodiumHexConversion(hexString?: string) {
   }
 
   if (cleanHex.length % 2 !== 0) {
-    log.error("Hex string must have an even number of characters", {
-      length: cleanHex.length,
-    });
+    log.error(
+      `Hex string must have an even number of characters - length: ${cleanHex.length}`,
+    );
     return null;
   }
 
@@ -39,11 +39,6 @@ async function safeSodiumHexConversion(hexString?: string) {
     return key;
   } catch (error) {
     log.error(`Hex conversion failed: ${error}`);
-    log.error(
-      `Error details: ${error?.name}\n
-      msg: ${error?.message}\n
-      stack: ${error?.stack}`,
-    );
     return null;
   }
 }
@@ -62,16 +57,22 @@ export const encrypt = async (text: string) => {
   //   (process.env?.APP_SECRET || "").trim().toLowerCase(),
   // ); // Convert hex secret to bytes
   const key = await safeSodiumHexConversion(secret);
-  log.debug(`nonce-bytes: ${sodium.crypto_secretbox_NONCEBYTES}`);
-  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES); // Generate a random nonce
-  log.debug(`nonce: ${nonce}`);
-  log.debug(`nonce-length: ${nonce.length}`);
-  const message = sodium.from_string(text); // Convert text to bytes
+  if (key === null) {
+    throw new Error("Invalid APP_SECRET");
+  } else {
+    log.debug(`key: ${key}`);
+    log.debug(`key-length: ${key.length}`);
+    log.debug(`nonce-bytes: ${sodium.crypto_secretbox_NONCEBYTES}`);
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES); // Generate a random nonce
+    log.debug(`nonce: ${nonce}`);
+    log.debug(`nonce-length: ${nonce.length}`);
+    const message = sodium.from_string(text); // Convert text to bytes
 
-  const cipherText = sodium.crypto_secretbox_easy(message, nonce, key); // Encrypt the message
-  log.debug(`cipherText: ${cipherText}`);
-  const encryptedMessage = `${sodium.to_base64(nonce, sodium.base64_variants.URLSAFE_NO_PADDING)}:${sodium.to_base64(cipherText, sodium.base64_variants.URLSAFE_NO_PADDING)}`; // Combine nonce and cipherText with a colon
+    const cipherText = sodium.crypto_secretbox_easy(message, nonce, key); // Encrypt the message
+    log.debug(`cipherText: ${cipherText}`);
+    const encryptedMessage = `${sodium.to_base64(nonce, sodium.base64_variants.URLSAFE_NO_PADDING)}:${sodium.to_base64(cipherText, sodium.base64_variants.URLSAFE_NO_PADDING)}`; // Combine nonce and cipherText with a colon
 
-  log.debug(`encryptedMessage: ${encryptedMessage}`);
-  return encryptedMessage; // Return the encrypted message
+    log.debug(`encryptedMessage: ${encryptedMessage}`);
+    return encryptedMessage; // Return the encrypted message
+  }
 };

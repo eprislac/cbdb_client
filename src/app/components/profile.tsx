@@ -10,10 +10,33 @@ export default async function Profile() {
 
   const user = session?.user;
   if (user) {
+    log.debug(`user: ${JSON.stringify(user)}`);
+    log.debug(`user.email: ${user.email}`);
+    log.debug(`user.name: ${user.name}`);
+    // Encrypt the email before sending it to the API
     const encryptedEmail = await encrypt(user.email || "");
+    log.debug(`encryptedEmail: ${encryptedEmail}`);
+    const params = {
+      headers: { "Content-Type": "application/json" },
+      method: "GET",
+      email: user.email,
+      name: user.name,
+    };
+    // Fetch user data from internal API
+
     const appDataReq = await fetch(
-      `${process.env.APP_BASE_URL}/api/users/${encryptedEmail}?name=${user.name}&email=${user.email}`,
+      `${process.env.APP_INTERNAL_URL}/api/users/${encryptedEmail}`,
+      params,
     );
+    log.debug(
+      `Fetching app user data from internal API: ${process.env.APP_INTERNAL_URL}/api/users/${encryptedEmail}?email=${user.email}`,
+    );
+    log.debug(`appDataReq.status: ${appDataReq.status}`);
+    if (!appDataReq.ok) {
+      throw new Error(
+        `Failed to fetch app user data: ${appDataReq.statusText}`,
+      );
+    }
     const appUser = await appDataReq.json();
     log.debug(`appUser: ${appUser}`);
     session.user.id = appUser.id;

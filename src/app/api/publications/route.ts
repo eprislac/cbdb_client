@@ -6,6 +6,7 @@ export async function GET(_req: NextApiRequest) {
   const log = logger.child({ module: "GET_api/publications/" });
   const apiResponse = await fetch(`${apiUrl}/v1/publications/`);
   const { data } = await apiResponse.json();
+  log.debug(`data: ${JSON.stringify(data)}`);
   return Response.json(data);
 }
 
@@ -21,5 +22,6 @@ export async function POST(req: NextApiRequest) {
     body: JSON.stringify(body),
   });
   const { data } = await apiResponse.json();
+  log.debug(`data: ${JSON.stringify(data)}`);
   return Response.json(data);
 }

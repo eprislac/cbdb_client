@@ -1,10 +1,9 @@
 import { auth0 } from "@/lib/auth0";
-import { encryptString } from "@/lib/encryptString";
+import "./main.css";
 
 export default async function Index() {
   const session = await auth0.getSession();
   const user = session?.user;
-  const encryptedEmail = encryptString(user?.email || "");
 
   return (
     <>
@@ -12,7 +11,6 @@ export default async function Index() {
       {user && (
         <ul>
           <li>{user.name}</li>
-          <li>{encryptedEmail}</li>
         </ul>
       )}
     </>

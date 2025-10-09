@@ -21,28 +21,36 @@ export async function GET(
   log.debug(`email: ${email}`);
   log.debug(`name: ${name}`);
   log.debug(`encryptedEmail: ${encryptedEmail}`);
+
   const apiResponse = await fetch(
     `${apiUrl}/users/by_enc_str/${encryptedEmail}`,
   );
   const { data, message } = await apiResponse.json();
-  let newData = data;
-  const { id } = data;
+  let newData = await data;
+  log.debug(`data: ${JSON.stringify(data)}`);
   if (message === "Not Found") {
-    const params: RequestInit = {
+    const params = {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({
-        user: {
-          name: name,
-          email: email,
-        },
-      }),
+      user: { email: email, name: name },
     };
-    const createResponse = await fetch(`${apiUrl}/v1/users`, params);
+    log.debug(`url: ${apiUrl}/users`);
+    log.debug(`params: ${JSON.stringify(params)}`);
+    const createResponse = await fetch(`${apiUrl}/users`, params);
     newData = await createResponse.json();
+    log.debug(`createResponse: ${JSON.stringify(newData)}`);
+    const { data: createdData } = newData;
+    const { id } = createdData;
+    newData = {
+      id: id,
+      name: name,
+      email: email,
+    };
+    log.debug(`newData: ${JSON.stringify(newData)}`);
   } else {
+    const { id } = data;
     newData = {
       id: id,
       name: name,
