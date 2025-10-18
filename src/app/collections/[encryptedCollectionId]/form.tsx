@@ -6,13 +6,14 @@ import {
 	ModalHeader,
 	ModalContent,
 	ModalBody,
+	Input,
 	useDisclosure,
 } from "@heroui/react";
 import { logger } from "@/lib/logger";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import { useFormik } from "formik";
-import { createCollection } from "./service";
-import { MultiStepForm, StepProps, Step } from "../components/multi-step-form";
+import { addItem } from "./service";
+import { encrypt } from "@/lib/encryptionService";
 
 const log = logger.child({ module: "collections/form" });
 
@@ -21,11 +22,11 @@ if (!process.env.API_URL) {
 	throw new Error("API_URL is not defined in environment variables");
 }
 
-export default function CollectionsForm(params: {
-	user: { email?: string; name?: string };
-	encryptedEmail?: string;
+export default function CollectionItemForm(params: {
+	user: { email: string | undefined };
+	encryptedId: string;
 }) {
-	const { user } = params;
+	const { user, encryptedId } = params;
 	const { isOpen, onOpen, onOpenChange } = useDisclosure();
 	const formik = useFormik({
 		initialValues: {
@@ -48,8 +49,8 @@ export default function CollectionsForm(params: {
 					if (!apiUrl) {
 						throw new Error("API_URL is not defined in environment variables");
 					}
-
-					const response = await createCollection(user.email, values.name);
+					const encryptedEmail = await encrypt(user.email);
+					const response = await addItem(encryptedEmail, encryptedId, values);
 					if (!response.ok) {
 						throw new Error(
 							`Error creating collection: ${response.statusText}`,
@@ -67,35 +68,6 @@ export default function CollectionsForm(params: {
 		},
 	});
 
-	const steps: Step[] = [
-		{
-			id: 1,
-			title: "Publication",
-			content: <div className="flex flex-col gap-4"></div>,
-		},
-		{
-			id: 2,
-			title: "Issue",
-			content: <div className="flex flex-col gap-4"></div>,
-		},
-		{
-			id: 3,
-			title: "Item Details",
-			content: <div className="flex flex-col gap-4"></div>,
-		},
-		{
-			id: 4,
-			title: "Review & Submit",
-			content: <div className="flex flex-col gap-4"></div>,
-		},
-		// Add more steps as needed
-	];
-
-	const props: StepProps = {
-		steps,
-		currentStep: 1,
-	};
-
 	return (
 		<div className="w-full flex justify-end mb-4 p-5 ">
 			<Button
@@ -107,19 +79,28 @@ export default function CollectionsForm(params: {
 			</Button>
 			<div className="">
 				<Modal
-					className="rounded-xl bg-gray-700 col-span-3 col-start-3"
+					className="rounded-xl  bg-gray-700 col-span-3 col-start-3"
 					isOpen={isOpen}
 					onOpenChange={onOpenChange}
 				>
 					<ModalContent>
 						{(onClose) => (
 							<>
-								<ModalHeader>Add New Collection</ModalHeader>
+								<ModalHeader>Add Item</ModalHeader>
 								<ModalBody>
-									<MultiStepForm
-										steps={props.steps}
-										currentStep={props.currentStep}
-									></MultiStepForm>
+									<form onSubmit={formik.handleSubmit}>
+										<div className="mb-4">
+											<label htmlFor="name">Name</label>
+											<Input
+												id="name"
+												name="name"
+												type="name"
+												onChange={formik.handleChange}
+												value={formik.values.name}
+											/>
+										</div>
+										<Button type="submit">Submit</Button>
+									</form>
 								</ModalBody>
 							</>
 						)}
